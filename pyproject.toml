@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "sar-synthetic-generator"
+version = "1.0.0"
+description = "Synthetic SAR Log Data Generator for Telco Cloud (OpenStack / CEPH)"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+
+dependencies = [
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+    "scipy>=1.10.0",
+    "pydantic>=2.0.0",
+    "PyYAML>=6.0",
+    "click>=8.0",
+]
+
+[project.optional-dependencies]
+viz = ["matplotlib>=3.7.0"]
+db = [
+    "influxdb-client>=1.36.0",
+    "psycopg2-binary>=2.9.0",
+    "prometheus-client>=0.17.0",
+]
+streaming = ["websockets>=11.0"]
+test = [
+    "pytest>=7.0",
+    "hypothesis>=6.82.0",
+]
+all = [
+    "sar-synthetic-generator[viz,db,streaming,test]",
+]
+
+[project.scripts]
+sar-generate = "main:main"
+sar-benchmark = "benchmark:_cli_main"
+
+[tool.setuptools.packages.find]
+include = [
+    "adapters", "benchmark", "compat", "engine",
+    "models", "streaming", "validation",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+markers = [
+    "slow: marks tests as slow-running (deselect with -m 'not slow')",
+]

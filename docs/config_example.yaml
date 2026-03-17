@@ -1,0 +1,153 @@
+# =============================================================================
+# SAR Generator – Tüm Özellikleri İçeren Örnek Config
+# =============================================================================
+# Bu dosya tüm mevcut yapılandırma seçeneklerini belgeler.
+# Gerçek kullanımda yalnızca ihtiyaç duyulan bölümleri dahil edin.
+# =============================================================================
+
+simulation:
+
+  # ── Zaman aralığı ─────────────────────────────────────────────────────────
+  start_time: "2024-01-01 00:00:00"
+  end_time:   "2024-01-07 23:59:59"
+  interval_seconds: 300           # 5 dakika (1–3600 arası)
+  description: "Telco Cloud 1-week full-featured simulation"
+  random_seed: 42                 # Tekrarlanabilir sonuçlar; null = rastgele
+
+  # ── Desen kontrolü ────────────────────────────────────────────────────────
+  diurnal_pattern: true           # Günlük yük dalgalanması (peak=10:00)
+  weekly_pattern: true            # Hafta sonu düşük yük
+  noise_level: 0.05               # Gürültü katsayısı (0.0–1.0)
+
+  # ── Node tanımları ────────────────────────────────────────────────────────
+  nodes:
+    - type: "ceph_storage"
+      count: 3
+      base_load: 0.6
+      anomaly_frequency: "low"    # none | low | medium | high
+      total_memory_kb: 262144000  # ~256 GB
+      cpu_count: 32
+      disk_count: 24
+      network_interfaces: 2
+
+    - type: "compute"
+      count: 10
+      base_load: 0.4
+      anomaly_frequency: "medium"
+      total_memory_kb: 131072000  # ~128 GB
+      cpu_count: 64
+      disk_count: 4
+      network_interfaces: 2
+
+    - type: "control_plane"
+      count: 3
+      base_load: 0.3
+      anomaly_frequency: "low"
+      total_memory_kb: 65536000   # ~64 GB
+      cpu_count: 16
+      disk_count: 2
+      network_interfaces: 2
+
+    - type: "network"
+      count: 2
+      base_load: 0.35
+      anomaly_frequency: "low"
+      total_memory_kb: 32768000   # ~32 GB
+      cpu_count: 8
+      disk_count: 2
+      network_interfaces: 8
+
+  # ── Anomali senaryoları ───────────────────────────────────────────────────
+  # Senaryo tipleri:
+  #   storage_contention | memory_pressure | network_saturation
+  #   cpu_steal_spike | cascading_failure | gradual_degradation | backup_storm
+  scenarios:
+    - type: "storage_contention"
+      start_time: "2024-01-03 14:00:00"
+      duration_hours: 2
+      severity: "high"            # low | medium | high | critical
+      target_node_types: ["ceph_storage", "compute"]
+      ramp_up_minutes: 10
+      ramp_down_minutes: 10
+
+    - type: "memory_pressure"
+      start_time: "2024-01-05 02:00:00"
+      duration_hours: 3
+      severity: "medium"
+      target_node_types: ["compute"]
+
+    - type: "backup_storm"
+      start_time: "2024-01-06 01:00:00"
+      duration_hours: 4
+      severity: "medium"
+      # target_node_types eksikse tüm node'lara uygulanır
+
+    - type: "cascading_failure"
+      start_time: "2024-01-04 08:00:00"
+      duration_hours: 1
+      severity: "critical"
+      target_node_types: ["compute", "ceph_storage"]
+
+  # ── Dosya çıktısı ─────────────────────────────────────────────────────────
+  output:
+    format: "both"                # csv | json | both
+    output_dir: "./output"
+    filename_prefix: "sar_synthetic"
+    compress: false               # true = .csv.gz / .json.gz
+    chunk_size: 100000            # Tek seferde yazılan maksimum satır
+    include_header: true
+
+    # Dosya rotasyonu (isteğe bağlı)
+    # rotation:
+    #   strategy: "size"          # size | time | hybrid
+    #   max_mb: 100               # size ve hybrid için
+    #   interval_minutes: 60      # time ve hybrid için
+    #   compress: true            # rotasyon sırasında sıkıştır
+    #   keep_last_n: 10           # Eski dosyaları sil (null = hepsini sakla)
+
+  # ── Veritabanı adaptörleri (isteğe bağlı) ────────────────────────────────
+  # Tüm adaptörler varsayılan olarak devre dışıdır.
+  # Aşağıdaki bölüm, adapters/database.py tarafından okunur.
+  #
+  # database:
+  #   influxdb:
+  #     enabled: true
+  #     host: localhost
+  #     port: 8086
+  #     token: "your-influxdb-token"
+  #     org: "your-org"
+  #     bucket: "sar_metrics"
+  #     batch_size: 5000
+  #     retries: 3
+  #     timeout_s: 10
+  #
+  #   postgresql:
+  #     enabled: false
+  #     host: localhost
+  #     port: 5432
+  #     database: sar_metrics
+  #     user: postgres
+  #     password: "your-password"
+  #     table: sar_data
+  #     pool_size: 5
+  #     retries: 3
+  #
+  #   prometheus:
+  #     enabled: false
+  #     port: 9100
+  #     prefix: sar
+  #     metrics: []               # Boşsa tüm metrikler expose edilir
+
+  # ── Gerçek zamanlı yayın (isteğe bağlı) ──────────────────────────────────
+  # streaming/streamer.py tarafından okunur.
+  # CLI: python main.py --config config.yaml --stream
+  #
+  # streaming:
+  #   enabled: false
+  #   mode: websocket             # stdout | socket | websocket
+  #   host: "0.0.0.0"
+  #   port: 9000
+  #   record_format: json         # json | csv
+  #   flush_interval_rows: 100
+  #   max_clients: 10
+  #   ws_ping_interval: 20        # WebSocket ping aralığı (saniye)

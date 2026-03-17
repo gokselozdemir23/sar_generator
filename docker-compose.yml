@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  # SAR Data Generator
+  sar-generator:
+    build: .
+    volumes:
+      - ./output:/app/output
+      - ./config.yaml:/app/config.yaml:ro
+    command: ["-c", "config.yaml"]
+
+  # Optional: InfluxDB for time-series storage
+  influxdb:
+    image: influxdb:2.7
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: adminpassword
+      DOCKER_INFLUXDB_INIT_ORG: my-org
+      DOCKER_INFLUXDB_INIT_BUCKET: sar_metrics
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: my-super-secret-token
+    profiles:
+      - db
+
+  # Optional: PostgreSQL for relational storage
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: sar_metrics
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+    profiles:
+      - db
+
+  # Optional: Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - influxdb
+    profiles:
+      - db
+
+volumes:
+  influxdb-data:
+  postgres-data:
+
+# Usage:
+#   docker compose up sar-generator              # Generate only
+#   docker compose --profile db up               # With DB stack
+#   docker compose run sar-generator --help      # Show help
