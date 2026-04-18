@@ -1,0 +1,53 @@
+# --- Core Dependencies ---
+# CLI yönetimi (main.py)
+click>=8.0.0
+
+# Veri analizi ve manipülasyonu (generator.py, output.py, anomaly.py)
+pandas>=2.0.0
+numpy>=1.24.0
+
+# İstatistiksel dağılımlar (generator.py)
+scipy>=1.10.0
+
+# Konfigürasyon yönetimi ve veri doğrulama (config.py - v2 tabanlı)
+pydantic>=2.0.0
+
+# YAML dosya okuma/yazma (config.py, main.py)
+PyYAML>=6.0
+
+# --- Optional Database Adapters (database.py) ---
+# InfluxDB desteği için
+# influxdb-client>=1.36.0
+
+# PostgreSQL desteği için
+# psycopg2-binary>=2.9.0
+
+# Prometheus metrikleri için
+# prometheus-client>=0.17.0
+
+# --- Core Dependencies (Temel Zorunlu Paketler) ---
+click>=8.0.0
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+pydantic>=2.0.0
+PyYAML>=6.0
+
+# --- Streaming / Real-time ---
+# WebSocket üzerinden canlı yayın yapmak için (streamer.py)
+# websockets>=11.0
+
+# --- Visualization / Reporting ---
+# Grafik üretimi ve görselleştirme araçları için (plots.py)
+matplotlib>=3.5.0
+
+# --- Database Adapters ---
+# Veritabanı entegrasyonlarını kullanacaksanız yorum satırlarını kaldırın (database.py)
+influxdb-client>=1.36.0
+psycopg2-binary>=2.9.0
+prometheus-client>=0.17.0
+
+# --- Testing & Development ---
+# Birim, performans ve property tabanlı testleri çalıştırmak için
+pytest>=7.0.0
+hypothesis>=6.80.0
