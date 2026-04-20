@@ -1,28 +1,14 @@
 #!/usr/bin/env python3
-"""
-Synthetic SAR Log Data Generator - Main Entry Point
-Telco Cloud (OpenStack / CEPH) SAR metrics simulation.
-
-Usage:
-    python main.py                             # Use built-in default config
-    python main.py --config config.yaml        # Use YAML config file
-    python main.py --config config.yaml --output-dir ./my_output
-    python main.py --write-example-config      # Dump example YAML config
-    python main.py --validate-only             # Validate config without generating
-"""
 from __future__ import annotations
 
 import logging
 import sys
 import time
-from pathlib import Path
 from typing import Optional
 
 import click
 
-# ---------------------------------------------------------------------------
 # Logging setup
-# ---------------------------------------------------------------------------
 
 logging.basicConfig(
     level=logging.INFO,
@@ -32,9 +18,7 @@ logging.basicConfig(
 logger = logging.getLogger("sar_generator")
 
 
-# ---------------------------------------------------------------------------
 # CLI
-# ---------------------------------------------------------------------------
 
 @click.command()
 @click.option(
@@ -130,7 +114,7 @@ def main(
     if visualize:
         try:
             from validation.plots import generate_all_plots
-            click.echo(f"🖼️  Grafik üretiliyor: {visualize} → {plots_dir}")
+            click.echo(f"  Grafik üretiliyor: {visualize} → {plots_dir}")
             paths = generate_all_plots(visualize, plots_dir)
             for p in paths:
                 click.echo(f"  ✓ {p}")
@@ -187,11 +171,11 @@ def main(
 
     # -- Validate only --
     if validate_only:
-        click.echo("\n✅ Configuration is valid.")
+        click.echo("\n Configuration is valid.")
         sys.exit(0)
 
     # -- Generate data --
-    click.echo("\n🚀 Starting data generation...")
+    click.echo("\n Starting data generation...")
     t0 = time.perf_counter()
 
     from engine.generator import SARDataGenerator
@@ -212,11 +196,12 @@ def main(
             if _raw_cfg and "streaming" in _raw_cfg:
                 from streaming.streamer import SARStreamer, StreamingConfig
                 _stream_cfg = StreamingConfig(**_raw_cfg["streaming"])
+                _stream_cfg.enabled = True
                 _streamer = SARStreamer(_stream_cfg)
                 _streamer.start()
-                click.echo(f"📡 Streaming aktif: {_stream_cfg.mode}")
+                click.echo(f" Streaming aktif: {_stream_cfg.mode}")
             else:
-                click.echo("⚠️  --stream verildi ama config'de [streaming] bölümü yok.", err=True)
+                click.echo("  --stream verildi ama config'de [streaming] bölümü yok.", err=True)
         except ImportError as exc:
             click.echo(f"❌ Streaming modülü yüklenemedi: {exc}", err=True)
 
@@ -235,13 +220,13 @@ def main(
         elapsed_gen = time.perf_counter() - t0
         rows_per_sec = len(df) / max(elapsed_gen, 0.001)
         click.echo(
-            f"\n✅ Generated {len(df):,} rows in {elapsed_gen:.2f}s "
+            f"\n Generated {len(df):,} rows in {elapsed_gen:.2f}s "
             f"({rows_per_sec:,.0f} rows/s)"
         )
         if _streamer:
             _streamer.send_chunk(df)
 
-        click.echo("💾 Writing output files...")
+        click.echo(" Writing output files...")
         all_paths = output_mgr.write(df)
 
     if _streamer:
@@ -249,13 +234,11 @@ def main(
 
     elapsed_total = time.perf_counter() - t0
     output_mgr.print_summary(all_paths)
-    click.echo(f"⏱️  Total time: {elapsed_total:.2f}s")
-    click.echo("✅ Done.")
+    click.echo(f" Total time: {elapsed_total:.2f}s")
+    click.echo("Done.")
 
 
-# ---------------------------------------------------------------------------
 # Summary printer
-# ---------------------------------------------------------------------------
 
 def _print_simulation_summary(config) -> None:
     duration_days = config.total_seconds / 86400
@@ -294,9 +277,7 @@ def _print_simulation_summary(config) -> None:
     click.echo("================================")
 
 
-# ---------------------------------------------------------------------------
 # Programmatic API
-# ---------------------------------------------------------------------------
 
 def run_simulation(config=None) -> "pd.DataFrame":
     """

@@ -1,14 +1,4 @@
 """
-File Rotation – Otomatik çıktı dosyası rotasyonu.
-
-Mevcut CSVOutputAdapter/JSONOutputAdapter'ı değiştirmez;
-onların üzerine oturan bir wrapper katmanı sağlar.
-
-Stratejiler:
-  - size  : max_mb aşılınca yeni dosya aç
-  - time  : interval_minutes geçince yeni dosya aç
-  - hybrid: ikisi de
-
 Kullanım (config.yaml):
     output:
       format: csv
@@ -17,9 +7,6 @@ Kullanım (config.yaml):
         max_mb: 100
         interval_minutes: 60
         compress: true
-
-CLI:
-    python main.py --config config.yaml
 """
 from __future__ import annotations
 
@@ -60,9 +47,7 @@ class RotationConfig(BaseModel):
     keep_last_n:      Optional[int]    = Field(default=None,   ge=1)
 
 
-# ---------------------------------------------------------------------------
 # Rotating File Handle
-# ---------------------------------------------------------------------------
 
 class RotatingFileHandle:
     """
@@ -89,7 +74,6 @@ class RotatingFileHandle:
         self._rotated_files: List[Path] = []
         self._open_new()
 
-    # ------------------------------------------------------------------
 
     @property
     def current_path(self) -> Path:
@@ -101,7 +85,6 @@ class RotatingFileHandle:
         """Rotation tamamlanmış (kapalı) dosyalar."""
         return list(self._rotated_files)
 
-    # ------------------------------------------------------------------
 
     def write(self, data: Union[str, bytes]) -> None:
         """Veriyi yaz; gerekirse önce rotasyon tetikle."""
@@ -121,7 +104,6 @@ class RotatingFileHandle:
         """Mevcut dosyayı kapat; sıkıştırma varsa uygula."""
         self._close_current()
 
-    # ------------------------------------------------------------------
 
     def _build_path(self) -> Path:
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -189,9 +171,7 @@ class RotatingFileHandle:
                 logger.warning("Silinemedi: %s — %s", old, exc)
 
 
-# ---------------------------------------------------------------------------
 # Rotating CSV Adapter
-# ---------------------------------------------------------------------------
 
 class RotatingCSVAdapter:
     """
@@ -215,7 +195,6 @@ class RotatingCSVAdapter:
         self._handle: Optional[RotatingFileHandle] = None
         self._header_written = False
 
-    # ------------------------------------------------------------------
 
     def open(self) -> None:
         """Dosya handle'ı başlat."""
@@ -262,9 +241,7 @@ class RotatingCSVAdapter:
         self.close()
 
 
-# ---------------------------------------------------------------------------
 # Rotating JSON (NDJSON) Adapter
-# ---------------------------------------------------------------------------
 
 class RotatingJSONAdapter:
     """
@@ -332,9 +309,7 @@ class RotatingJSONAdapter:
         self.close()
 
 
-# ---------------------------------------------------------------------------
 # Helper
-# ---------------------------------------------------------------------------
 
 def _df_to_csv_buf(df: pd.DataFrame, header: bool = True) -> str:
     """DataFrame'i CSV string'e dönüştür."""

@@ -1,7 +1,4 @@
-"""
-Output Adapters - SAR-compatible CSV formatter and hierarchical JSON output.
-Supports chunked writing, compression, and streaming modes.
-"""
+
 from __future__ import annotations
 
 import gzip
@@ -21,9 +18,7 @@ from engine.generator import SAR_COLUMNS
 logger = logging.getLogger(__name__)
 
 
-# ---------------------------------------------------------------------------
 # Base adapter
-# ---------------------------------------------------------------------------
 
 class BaseOutputAdapter:
     def __init__(self, output_cfg: OutputConfig):
@@ -42,9 +37,7 @@ class BaseOutputAdapter:
         raise NotImplementedError
 
 
-# ---------------------------------------------------------------------------
 # CSV Adapter
-# ---------------------------------------------------------------------------
 
 class CSVOutputAdapter(BaseOutputAdapter):
     """
@@ -92,7 +85,7 @@ class CSVOutputAdapter(BaseOutputAdapter):
         return paths
 
     def _prepare_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Ensure correct column order and fill missing SAR columns."""
+        # Ensure correct column order and fill missing SAR columns.
         # Add any missing columns
         out = df.copy()
         for col in SAR_COLUMNS:
@@ -101,15 +94,12 @@ class CSVOutputAdapter(BaseOutputAdapter):
         return out[SAR_COLUMNS]
 
 
-# ---------------------------------------------------------------------------
 # JSON Adapter
-# ---------------------------------------------------------------------------
 
 class JSONOutputAdapter(BaseOutputAdapter):
-    """
-    Writes hierarchical JSON output for modern data pipelines.
-    Structure: { metadata, nodes: { hostname: [ {timestamp, metrics}, ... ] } }
-    """
+
+    # Structure: { metadata, nodes: { hostname: [ {timestamp, metrics}, ... ] } }
+
 
     def write(self, df: pd.DataFrame, suffix: str = "full") -> Path:
         path = self._make_path(suffix, "json")
@@ -183,7 +173,7 @@ class JSONOutputAdapter(BaseOutputAdapter):
             d[col] = val
         return d
 
-    # -- Nested JSON (document specification format) --------------------
+    # Nested JSON (document specification format)
 
     def write_nested(self, df: pd.DataFrame, suffix: str = "nested") -> Path:
         """Write nested/grouped JSON matching the document specification."""
@@ -266,9 +256,7 @@ class JSONOutputAdapter(BaseOutputAdapter):
         raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
 
-# ---------------------------------------------------------------------------
 # Combined adapter
-# ---------------------------------------------------------------------------
 
 class OutputManager:
     """

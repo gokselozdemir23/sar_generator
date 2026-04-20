@@ -1,14 +1,3 @@
-"""
-Visualization Tools – SAR veri setini matplotlib ile görselleştirir.
-
-Mevcut pipeline'a dokunmaz; üretilmiş CSV/DataFrame'i girdi olarak alır.
-
-CLI:
-    python main.py --visualize output/sar_synthetic_full.csv
-    python -m validation.plots output/sar_synthetic_full.csv --output-dir ./plots
-
-Gereksinim: pip install matplotlib
-"""
 from __future__ import annotations
 
 import logging
@@ -34,9 +23,8 @@ def _require_matplotlib():
         ) from exc
 
 
-# ---------------------------------------------------------------------------
+
 # Internal helpers
-# ---------------------------------------------------------------------------
 
 def _load_df(source: Union[str, Path, pd.DataFrame]) -> pd.DataFrame:
     """CSV dosyası veya DataFrame kabul eder."""
@@ -70,9 +58,7 @@ def _save_or_show(plt, path: Optional[Path], filename: str) -> Path:
         return Path(filename)
 
 
-# ---------------------------------------------------------------------------
 # Plot Functions
-# ---------------------------------------------------------------------------
 
 def plot_cpu_timeseries(
     source: Union[str, Path, pd.DataFrame],
@@ -82,15 +68,6 @@ def plot_cpu_timeseries(
 ) -> Path:
     """
     CPU kullanım zaman serisi grafiği (%usr, %sys, %iowait, %steal, %idle).
-
-    Args:
-        source:     CSV dosya yolu veya DataFrame.
-        hostname:   Belirli bir host için filtrele. None ise ilk host seçilir.
-        output_dir: Grafik kaydedileceği dizin. None ise ekranda gösterilir.
-        figsize:    Grafik boyutu (genişlik, yükseklik) inç.
-
-    Returns:
-        Kaydedilen dosyanın yolu.
     """
     plt, mdates = _require_matplotlib()
     df = _parse_datetime(_load_df(source))
@@ -131,14 +108,6 @@ def plot_memory_trends(
     """
     Bellek kullanım trendi grafiği (%memused, %swpused).
 
-    Args:
-        source:     CSV dosya yolu veya DataFrame.
-        hostname:   Belirli bir host için filtrele.
-        output_dir: Grafik kaydedileceği dizin.
-        figsize:    Grafik boyutu.
-
-    Returns:
-        Kaydedilen dosyanın yolu.
     """
     plt, mdates = _require_matplotlib()
     df = _parse_datetime(_load_df(source))
@@ -186,14 +155,6 @@ def plot_network_throughput(
     """
     Ağ throughput grafiği (rxkB/s ve txkB/s).
 
-    Args:
-        source:     CSV dosya yolu veya DataFrame.
-        hostname:   Belirli bir host için filtrele.
-        output_dir: Grafik kaydedileceği dizin.
-        figsize:    Grafik boyutu.
-
-    Returns:
-        Kaydedilen dosyanın yolu.
     """
     plt, mdates = _require_matplotlib()
     df = _parse_datetime(_load_df(source))
@@ -234,14 +195,6 @@ def plot_anomaly_distribution(
     """
     Seçili metriklerin kutu grafiği (boxplot) — anomali dağılımını görselleştirir.
 
-    Args:
-        source:     CSV dosya yolu veya DataFrame.
-        metrics:    Görselleştirilecek metrik listesi.
-        output_dir: Grafik kaydedileceği dizin.
-        figsize:    Grafik boyutu.
-
-    Returns:
-        Kaydedilen dosyanın yolu.
     """
     plt, _ = _require_matplotlib()
     df = _load_df(source)
@@ -282,14 +235,6 @@ def plot_disk_io(
     """
     Disk I/O grafiği (tps, await, %util).
 
-    Args:
-        source:     CSV dosya yolu veya DataFrame.
-        hostname:   Belirli bir host için filtrele.
-        output_dir: Grafik kaydedileceği dizin.
-        figsize:    Grafik boyutu.
-
-    Returns:
-        Kaydedilen dosyanın yolu.
     """
     plt, mdates = _require_matplotlib()
     df = _parse_datetime(_load_df(source))
@@ -330,13 +275,6 @@ def generate_all_plots(
     """
     Tüm grafikleri üretir ve output_dir'e kaydeder.
 
-    Args:
-        source:     CSV dosya yolu veya DataFrame.
-        output_dir: Grafiklerin kaydedileceği dizin.
-        hostname:   Belirli bir host için filtrele (None ise ilk host).
-
-    Returns:
-        Üretilen dosya yollarının listesi.
     """
     out_dir = Path(output_dir)
     paths: List[Path] = []
@@ -365,12 +303,9 @@ def generate_all_plots(
     return paths
 
 
-# ---------------------------------------------------------------------------
 # CLI entry point
-# ---------------------------------------------------------------------------
 
 def _cli_main() -> None:
-    """python -m validation.plots <csv> [--output-dir ./plots] [--host hostname]"""
     import argparse
 
     parser = argparse.ArgumentParser(description="SAR veri görselleştirme aracı")

@@ -1,8 +1,4 @@
-"""
-Pattern & Anomaly Engine - Injects realistic failure scenarios into generated time-series data.
-Supports: storage contention, memory pressure, network saturation, CPU steal spikes,
-cascading failures, gradual degradation, and backup storm scenarios.
-"""
+
 from __future__ import annotations
 
 import logging
@@ -78,9 +74,8 @@ class AnomalyEngine:
 
         return df
 
-    # ------------------------------------------------------------------
     # Scenario dispatch
-    # ------------------------------------------------------------------
+
 
     def _node_targeted(self, scenario: ScenarioConfig, node_cfg: NodeConfig) -> bool:
         """Check if this scenario targets this node type."""
@@ -124,9 +119,8 @@ class AnomalyEngine:
 
         return df
 
-    # ------------------------------------------------------------------
+
     # Scenario handlers
-    # ------------------------------------------------------------------
 
     def _storage_contention(
         self,
@@ -372,9 +366,7 @@ class AnomalyEngine:
         df = _rebalance_cpu(df, mask)
         return df
 
-    # ------------------------------------------------------------------
     # Random micro-anomalies
-    # ------------------------------------------------------------------
 
     def _inject_random_anomalies(
         self,
@@ -412,9 +404,7 @@ class AnomalyEngine:
 
         return df
 
-    # ------------------------------------------------------------------
     # Helpers
-    # ------------------------------------------------------------------
 
     def _time_mask(
         self,
@@ -430,9 +420,7 @@ class AnomalyEngine:
         return mask.values
 
 
-# ---------------------------------------------------------------------------
 # Injection helpers (module-level for performance)
-# ---------------------------------------------------------------------------
 
 def _inject(
     df: pd.DataFrame,

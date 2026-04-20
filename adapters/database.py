@@ -1,33 +1,4 @@
-"""
-Database Output Adapters – Pluggable writers for InfluxDB, PostgreSQL ve Prometheus.
 
-Her adapter, mevcut CSV/JSON pipeline'ına dokunmadan bağımsız çalışır.
-Adapter'lar lazy import kullanır: driver kurulu değilse yalnızca kullanımda hata verir.
-
-Kullanım (config.yaml):
-    database:
-      influxdb:
-        enabled: true
-        host: localhost
-        port: 8086
-        token: "my-token"
-        org: "my-org"
-        bucket: "sar_metrics"
-        batch_size: 5000
-      postgresql:
-        enabled: true
-        host: localhost
-        port: 5432
-        database: sar_metrics
-        user: postgres
-        password: secret
-        table: sar_data
-        pool_size: 5
-      prometheus:
-        enabled: true
-        port: 9100
-        prefix: sar
-"""
 from __future__ import annotations
 
 import logging
@@ -41,9 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field
 logger = logging.getLogger(__name__)
 
 
-# ---------------------------------------------------------------------------
 # Config Models
-# ---------------------------------------------------------------------------
 
 class InfluxDBConfig(BaseModel):
     """InfluxDB v2 bağlantı yapılandırması."""
@@ -114,9 +83,7 @@ class DatabaseConfig(BaseModel):
             self.prometheus = PrometheusConfig()
 
 
-# ---------------------------------------------------------------------------
 # Base Writer Interface
-# ---------------------------------------------------------------------------
 
 class BaseWriter(ABC):
     """Tüm database writer'larının uyması gereken arayüz."""
@@ -179,9 +146,7 @@ class BaseWriter(ABC):
         self.close()
 
 
-# ---------------------------------------------------------------------------
 # InfluxDB Writer
-# ---------------------------------------------------------------------------
 
 class InfluxDBWriter(BaseWriter):
     """
@@ -273,9 +238,7 @@ class InfluxDBWriter(BaseWriter):
             logger.info("InfluxDB bağlantısı kapatıldı.")
 
 
-# ---------------------------------------------------------------------------
 # PostgreSQL Writer
-# ---------------------------------------------------------------------------
 
 class PostgreSQLWriter(BaseWriter):
     """
@@ -370,9 +333,7 @@ class PostgreSQLWriter(BaseWriter):
             logger.info("PostgreSQL pool kapatıldı.")
 
 
-# ---------------------------------------------------------------------------
 # Prometheus Exporter
-# ---------------------------------------------------------------------------
 
 class PrometheusExporter(BaseWriter):
     """
@@ -444,9 +405,7 @@ class PrometheusExporter(BaseWriter):
         logger.info("Prometheus exporter: kapatma isteği alındı (server çalışmaya devam eder).")
 
 
-# ---------------------------------------------------------------------------
 # Database Pipeline Orchestrator
-# ---------------------------------------------------------------------------
 
 class DatabasePipeline:
     """

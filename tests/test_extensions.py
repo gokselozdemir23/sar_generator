@@ -63,9 +63,7 @@ def _make_sample_df(n_rows: int = 200) -> pd.DataFrame:
     return SARDataGenerator(cfg).generate_all()
 
 
-# ---------------------------------------------------------------------------
 # 1. Database adapter config tests
-# ---------------------------------------------------------------------------
 
 def _suite_database_config():
     print("\n── Database Config ─────────────────────────────────────")
@@ -133,9 +131,7 @@ def _suite_database_config():
     T("BaseWriter.write_with_retry raises after max retries", _base_writer_retry_raises)
 
 
-# ---------------------------------------------------------------------------
 # 2. Streaming config tests
-# ---------------------------------------------------------------------------
 
 def _suite_streaming():
     print("\n── Streaming ───────────────────────────────────────────")
@@ -221,9 +217,7 @@ def _suite_streaming():
     T("SARStreamer: context manager works", _sar_streamer_context_manager)
 
 
-# ---------------------------------------------------------------------------
 # 3. File rotation tests
-# ---------------------------------------------------------------------------
 
 def _suite_rotation():
     print("\n── File Rotation ───────────────────────────────────────")
@@ -297,9 +291,7 @@ def _suite_rotation():
     T("RotatingJSONAdapter: writes .ndjson files", _rotating_json_adapter)
 
 
-# ---------------------------------------------------------------------------
 # 4. Statistical validation tests
-# ---------------------------------------------------------------------------
 
 def _suite_validation():
     print("\n── Statistical Validation ──────────────────────────────")

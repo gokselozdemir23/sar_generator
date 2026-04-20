@@ -1,14 +1,10 @@
-"""
-Tests for validation/comparison.py module.
-Mevcut testlere dokunmaz; tamamen bağımsız çalışır.
-"""
 from __future__ import annotations
 
 import sys
 from datetime import datetime
 from pathlib import Path
 
-import numpy as np
+
 import pandas as pd
 import pytest
 
@@ -26,9 +22,7 @@ from validation.comparison import (
 )
 
 
-# ---------------------------------------------------------------------------
 # Fixtures
-# ---------------------------------------------------------------------------
 
 @pytest.fixture
 def sample_df():
@@ -51,9 +45,7 @@ def sample_df():
     return SARDataGenerator(cfg).generate_all()
 
 
-# ---------------------------------------------------------------------------
 # Tests
-# ---------------------------------------------------------------------------
 
 class TestSARPatternComparator:
 

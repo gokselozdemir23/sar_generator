@@ -142,12 +142,12 @@ simulation:
   # streaming/streamer.py tarafından okunur.
   # CLI: python main.py --config config.yaml --stream
   #
-  # streaming:
-  #   enabled: false
-  #   mode: websocket             # stdout | socket | websocket
-  #   host: "0.0.0.0"
-  #   port: 9000
-  #   record_format: json         # json | csv
-  #   flush_interval_rows: 100
-  #   max_clients: 10
-  #   ws_ping_interval: 20        # WebSocket ping aralığı (saniye)
+  streaming:
+     enabled: false
+     mode: socket             # stdout | socket | websocket
+     host: "0.0.0.0"
+     port: 9000
+     record_format: json         # json | csv
+     flush_interval_rows: 100
+     max_clients: 10
+     ws_ping_interval: 20        # WebSocket ping aralığı (saniye)

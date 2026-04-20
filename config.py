@@ -1,6 +1,3 @@
-"""
-Configuration Manager – Pydantic v2 tabanlı SAR Log Data Generator yapılandırma modülü.
-"""
 from __future__ import annotations
 
 import json
@@ -12,15 +9,9 @@ from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-# Forward-compatible: new config sections (optional, imported lazily to avoid circular deps)
-# DatabaseConfig  -> adapters/database.py
-# StreamingConfig -> streaming/streamer.py
-# RotationConfig  -> adapters/rotation.py
 
 
-# ---------------------------------------------------------------------------
 # Enumerations
-# ---------------------------------------------------------------------------
 
 class NodeType(str, Enum):
     COMPUTE        = "compute"
@@ -67,9 +58,7 @@ class DataQualityLevel(str, Enum):
     DEGRADED = "degraded"    # Systematic drift and artifacts
 
 
-# ---------------------------------------------------------------------------
 # Pydantic Models
-# ---------------------------------------------------------------------------
 
 class NodeConfig(BaseModel):
     model_config = ConfigDict(use_enum_values=False)
@@ -187,9 +176,7 @@ class SimulationConfig(BaseModel):
         return self.total_seconds // self.interval_seconds
 
 
-# ---------------------------------------------------------------------------
 # Loader & Helpers
-# ---------------------------------------------------------------------------
 
 def load_config(path: Union[str, Path]) -> SimulationConfig:
     """YAML veya JSON dosyasından SimulationConfig yükle ve doğrula."""
@@ -254,12 +241,13 @@ EXAMPLE_YAML = """\
 simulation:
   start_time: "2024-01-01 00:00:00"
   end_time: "2024-01-07 23:59:59"
-  interval_seconds: 300
+  interval_seconds: 300          # 5 dakikada bir örnekleme
+  random_seed: 42                # Tekrarlanabilir sonuçlar
+  diurnal_pattern: true          # Gündüz/gece paterni
+  weekly_pattern: true           # Hafta içi/sonu paterni
+  noise_level: 0.05              # Gürültü seviyesi (0.0 - 1.0)
+  data_quality: normal           # clean | normal | noisy | degraded
   description: "Telco Cloud 1-week simulation"
-  random_seed: 42
-  diurnal_pattern: true
-  weekly_pattern: true
-  noise_level: 0.05
 
   nodes:
     - type: "ceph_storage"
@@ -300,6 +288,8 @@ simulation:
       duration_hours: 2
       severity: "high"
       target_node_types: ["ceph_storage", "compute"]
+      ramp_up_minutes: 5
+      ramp_down_minutes: 5
 
     - type: "memory_pressure"
       start_time: "2024-01-05 02:00:00"
@@ -313,15 +303,49 @@ simulation:
       severity: "medium"
 
   output:
-    format: "both"
+    format: "both"               # csv | json | both
     output_dir: "./output"
     filename_prefix: "sar_synthetic"
     compress: false
     chunk_size: 100000
+    include_header: true
+
+  # Opsiyonel: Veritabanı çıktısı
+  database:
+    influxdb:
+      enabled: false
+      host: localhost
+      port: 8086
+      token: "my-token"
+      org: "my-org"
+      bucket: "sar_metrics"
+      batch_size: 5000
+    postgresql:
+      enabled: false
+      host: localhost
+      port: 5432
+      database: sar_metrics
+      user: postgres
+      password: secret
+      table: sar_data
+    prometheus:
+      enabled: false
+      port: 9100
+      prefix: sar
+
+  # Opsiyonel: Gerçek zamanlı streaming
+  streaming:
+    enabled: true
+    mode: socket                 # stdout | socket | websocket
+    host: 0.0.0.0
+    port: 9000
+    record_format: json          # json | csv
+    flush_interval_rows: 100
+
 """
 
 
-def write_example_config(path: Union[str, Path] = "config_example.yaml") -> None:
+def write_example_config(path: Union[str, Path] = "config.yaml") -> None:
     with open(path, "w") as f:
         f.write(EXAMPLE_YAML)
     print(f"Example config written to: {path}")

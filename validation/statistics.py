@@ -1,12 +1,4 @@
-"""
-Statistical Validation Tools – Üretilen SAR verisinin kalitesini analiz eder.
 
-Mevcut generator'a dokunmaz; üretilen DataFrame'i girdi olarak alır.
-
-CLI:
-    python -m validation.statistics output/sar_synthetic_full.csv
-    python main.py --validate-data output/sar_synthetic_full.csv
-"""
 from __future__ import annotations
 
 import json
@@ -23,9 +15,7 @@ from scipy import stats
 logger = logging.getLogger(__name__)
 
 
-# ---------------------------------------------------------------------------
 # Result types
-# ---------------------------------------------------------------------------
 
 @dataclass
 class MetricCheck:
@@ -93,7 +83,7 @@ class ValidationReport:
             sum(1 for c in self.correlation_checks if c.passed),
             sum(1 for c in self.anomaly_checks      if c.passed),
         ])
-        status = "✅ PASS" if self.passed else "❌ FAIL"
+        status = " PASS" if self.passed else " FAIL"
 
         print(f"\n{'='*60}")
         print(f"  SAR Data Validation Report  {status}")
@@ -135,26 +125,10 @@ class ValidationReport:
         print(f"{'='*60}\n")
 
 
-# ---------------------------------------------------------------------------
 # Validator
-# ---------------------------------------------------------------------------
 
 class StatisticalValidator:
-    """
-    Üretilen SAR verisinin istatistiksel kalitesini doğrular.
 
-    Kontroller:
-    1. Metrik dağılım kontrolü (mean/std aralık testi)
-    2. Çapraz metrik korelasyon kontrolü
-    3. Anomali frekansı kontrolü
-    4. Veri bütünlüğü (null, negatif, sınır aşımı)
-
-    Örnek::
-
-        validator = StatisticalValidator(df)
-        report = validator.run_all()
-        report.print_summary()
-    """
 
     # Beklenen değer aralıkları: (min_mean, max_mean, max_std)
     EXPECTED_RANGES: Dict[str, Tuple[float, float, float]] = {
@@ -190,9 +164,7 @@ class StatisticalValidator:
             if pd.api.types.is_numeric_dtype(df[c]) and c not in {"TTY", "blocked"}
         ]
 
-    # ------------------------------------------------------------------
     # Public API
-    # ------------------------------------------------------------------
 
     def run_all(self) -> ValidationReport:
         """
@@ -230,15 +202,9 @@ class StatisticalValidator:
         self,
         columns: Optional[List[str]] = None,
     ) -> List[MetricCheck]:
-        """
-        Belirtilen kolonların mean/std değerlerini beklenen aralıklarla karşılaştırır.
 
-        Args:
-            columns: Kontrol edilecek kolon listesi. None ise EXPECTED_RANGES kullanılır.
+        # Belirtilen kolonların mean/std değerlerini beklenen aralıklarla karşılaştırır.
 
-        Returns:
-            Her metrik için MetricCheck listesi.
-        """
         targets = columns or list(self.EXPECTED_RANGES.keys())
         results: List[MetricCheck] = []
 
@@ -279,16 +245,9 @@ class StatisticalValidator:
         self,
         pairs: Optional[List[Tuple[str, str, float, str]]] = None,
     ) -> List[CorrelationCheck]:
-        """
-        Metrik çiftleri arasındaki Pearson korelasyonunu doğrular.
 
-        Args:
-            pairs: [(metrik_a, metrik_b, min_r, yön)] listesi.
-                   None ise EXPECTED_CORRELATIONS kullanılır.
+        # Metrik çiftleri arasındaki Pearson korelasyonunu doğrular.
 
-        Returns:
-            CorrelationCheck listesi.
-        """
         targets = pairs or self.EXPECTED_CORRELATIONS
         results: List[CorrelationCheck] = []
 
@@ -326,18 +285,10 @@ class StatisticalValidator:
         metric: str = "await",
         threshold_multiplier: float = 3.0,
     ) -> List[AnomalyCheck]:
-        """
-        Her hostname için anomali (aşırı değer) frekansını kontrol eder.
 
-        Anomali tanımı: mean + threshold_multiplier * std üzerindeki değerler.
+        # Her hostname için anomali (aşırı değer) frekansını kontrol eder.
 
-        Args:
-            metric:               Kontrol edilecek metrik.
-            threshold_multiplier: Kaç sigma üzeri anomali sayılır.
 
-        Returns:
-            AnomalyCheck listesi.
-        """
         if metric not in self._df.columns or "hostname" not in self._df.columns:
             return []
 
@@ -364,22 +315,16 @@ class StatisticalValidator:
         return results
 
     def null_check(self) -> Dict[str, int]:
-        """
-        Tüm kolonlardaki null değer sayısını döndür.
 
-        Returns:
-            {kolon: null_sayısı}
-        """
+        # Tüm kolonlardaki null değer sayısını döndür.
+
         nulls = self._df[self._numeric_cols].isnull().sum()
         return {col: int(cnt) for col, cnt in nulls.items() if cnt > 0}
 
     def range_check(self) -> Dict[str, Dict[str, float]]:
-        """
-        Sayısal kolonların min/max değerlerini döndür.
 
-        Returns:
-            {kolon: {min: x, max: y}}
-        """
+        # Sayısal kolonların min/max değerlerini döndür.
+
         result: Dict[str, Dict[str, float]] = {}
         for col in self._numeric_cols:
             if col not in self._df.columns:
@@ -391,21 +336,15 @@ class StatisticalValidator:
         return result
 
     def distribution_summary(self) -> pd.DataFrame:
-        """
-        Tüm sayısal kolonlar için describe() çıktısını döndür.
 
-        Returns:
-            pd.DataFrame – istatistik özeti.
-        """
+        # Tüm sayısal kolonlar için describe() çıktısını döndür.
+
         return self._df[self._numeric_cols].describe().T.round(3)
 
 
-# ---------------------------------------------------------------------------
 # CLI entry point
-# ---------------------------------------------------------------------------
 
 def _cli_main() -> None:
-    """python -m validation.statistics <csv_path> [--json] [--out report.json]"""
     import argparse
 
     parser = argparse.ArgumentParser(description="SAR veri doğrulama aracı")

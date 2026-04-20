@@ -1,7 +1,4 @@
-"""
-Node Profiles - Base load characteristics and metric coefficients for each node type.
-Defines statistical distributions and cross-metric correlation weights.
-"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

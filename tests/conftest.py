@@ -1,7 +1,3 @@
-"""
-Shared pytest configuration and markers.
-Mevcut testlere dokunmaz; yalnızca ortak yapılandırma sağlar.
-"""
 import sys
 from pathlib import Path
 

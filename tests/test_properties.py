@@ -1,11 +1,3 @@
-"""
-Property-based tests using hypothesis.
-Mevcut test dosyalarına dokunmaz; tamamen bağımsız çalışır.
-
-Çalıştırma:
-    pytest tests/test_properties.py -v
-    pytest tests/test_properties.py -v --hypothesis-show-statistics
-"""
 from __future__ import annotations
 
 import sys
@@ -33,9 +25,7 @@ from config import (
 from engine.generator import SARDataGenerator, SAR_COLUMNS
 
 
-# ---------------------------------------------------------------------------
 # Skip entire module if hypothesis not installed
-# ---------------------------------------------------------------------------
 
 pytestmark = pytest.mark.skipif(
     not HAS_HYPOTHESIS,
@@ -43,9 +33,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-# ---------------------------------------------------------------------------
 # Strategies
-# ---------------------------------------------------------------------------
 
 if HAS_HYPOTHESIS:
     node_type_st = st.sampled_from([
@@ -86,9 +74,7 @@ if HAS_HYPOTHESIS:
         )
 
 
-# ---------------------------------------------------------------------------
 # Property-based tests
-# ---------------------------------------------------------------------------
 
 @given(cfg=sim_config_st())
 @settings(

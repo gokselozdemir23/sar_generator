@@ -1,13 +1,4 @@
-"""
-SAR Pattern Comparison Tool – Sentetik veriyi gerçek SAR referans
-profilleriyle karşılaştırır.
 
-Mevcut pipeline'a dokunmaz; üretilmiş DataFrame veya CSV'yi girdi olarak alır.
-
-CLI:
-    python -m validation.comparison synthetic.csv --use-builtin
-    python -m validation.comparison synthetic.csv --reference real.csv
-"""
 from __future__ import annotations
 
 import json
@@ -24,10 +15,8 @@ from scipy import stats as sp_stats
 logger = logging.getLogger(__name__)
 
 
-# ---------------------------------------------------------------------------
 # Built-in reference profiles (aggregated from real Telco SAR data)
-# Format: { node_type: { metric: (expected_mean, expected_std) } }
-# ---------------------------------------------------------------------------
+
 
 BUILTIN_REFERENCE: Dict[str, Dict[str, Tuple[float, float]]] = {
     "compute": {
@@ -71,9 +60,7 @@ BUILTIN_REFERENCE: Dict[str, Dict[str, Tuple[float, float]]] = {
 }
 
 
-# ---------------------------------------------------------------------------
 # Result dataclasses
-# ---------------------------------------------------------------------------
 
 @dataclass
 class ComparisonResult:
@@ -127,27 +114,12 @@ class ComparisonReport:
         print(f"{'='*65}\n")
 
 
-# ---------------------------------------------------------------------------
 # Comparator
-# ---------------------------------------------------------------------------
 
 class SARPatternComparator:
     """
     Sentetik SAR verisini referans profillerle karşılaştırır.
 
-    Karşılaştırma yöntemleri:
-      1. Mean/std benzerlik testi (% fark)
-      2. Kolmogorov-Smirnov dağılım testi
-
-    Örnek::
-
-        comparator = SARPatternComparator(synthetic_df)
-        report = comparator.compare_builtin()
-        report.print_summary()
-
-    Gerçek referans verisi ile::
-
-        report = comparator.compare_with(reference_df)
     """
 
     # Mean fark eşiği (% olarak)
@@ -174,12 +146,6 @@ class SARPatternComparator:
     ) -> ComparisonReport:
         """
         Built-in veya sağlanan referans profillere karşı karşılaştırma.
-
-        Args:
-            reference: Opsiyonel referans dict. None ise BUILTIN_REFERENCE kullanılır.
-
-        Returns:
-            ComparisonReport
         """
         ref = reference or BUILTIN_REFERENCE
         results: List[ComparisonResult] = []
@@ -239,13 +205,6 @@ class SARPatternComparator:
     ) -> ComparisonReport:
         """
         Gerçek bir SAR CSV/DataFrame ile karşılaştırma.
-
-        Args:
-            reference_df: Referans SAR DataFrame.
-            metrics:      Karşılaştırılacak metrik listesi. None ise tüm sayısal.
-
-        Returns:
-            ComparisonReport
         """
         target_cols = metrics or [
             c for c in self._df.columns
@@ -290,9 +249,7 @@ class SARPatternComparator:
         )
 
 
-# ---------------------------------------------------------------------------
 # CLI entry point
-# ---------------------------------------------------------------------------
 
 def _cli_main() -> None:
     """python -m validation.comparison <csv> [--reference ref.csv] [--json]"""

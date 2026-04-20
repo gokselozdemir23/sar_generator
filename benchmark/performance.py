@@ -1,16 +1,3 @@
-"""
-Performance Benchmark Tool – SAR generator'ın üretim kapasitesini ölçer.
-
-Ölçülen metrikler:
-  - Saniyede üretilen satır sayısı (rows/s)
-  - Peak ve ortalama bellek kullanımı
-  - Toplam çalışma süresi
-  - Chunk başına süre dağılımı
-
-CLI:
-    python benchmark.py --nodes 100 --days 7
-    python benchmark.py --nodes 50 --days 1 --interval 60 --warmup 2
-"""
 from __future__ import annotations
 
 import gc
@@ -27,9 +14,7 @@ from typing import Any, Dict, List, Optional
 logger = logging.getLogger(__name__)
 
 
-# ---------------------------------------------------------------------------
 # Result dataclass
-# ---------------------------------------------------------------------------
 
 @dataclass
 class BenchmarkResult:
@@ -110,9 +95,7 @@ class BenchmarkResult:
         return d
 
 
-# ---------------------------------------------------------------------------
 # Benchmark engine
-# ---------------------------------------------------------------------------
 
 class PerformanceBenchmark:
     """
@@ -277,9 +260,7 @@ class PerformanceBenchmark:
         )
 
 
-# ---------------------------------------------------------------------------
 # CLI entry point  (python benchmark.py …)
-# ---------------------------------------------------------------------------
 
 def _cli_main() -> None:
     import argparse

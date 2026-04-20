@@ -1,10 +1,3 @@
-"""
-Performance criteria tests – Doküman başarı kriterlerini doğrular.
-
-Çalıştırma:
-    pytest tests/test_performance.py -v -m slow
-    pytest tests/test_performance.py -v -m slow --timeout=600
-"""
 from __future__ import annotations
 
 import sys

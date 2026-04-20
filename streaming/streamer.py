@@ -1,21 +1,3 @@
-"""
-Real-Time Streaming Output – SAR verilerini canlı olarak stdout, socket veya
-WebSocket üzerinden yayınlar.
-
-Mevcut generator pipeline'ını değiştirmez; generate_chunks() çıktısını tüketir.
-
-Kullanım (config.yaml):
-    streaming:
-      enabled: true
-      mode: websocket   # stdout | socket | websocket
-      host: 0.0.0.0
-      port: 9000
-      record_format: json  # json | csv
-      flush_interval_rows: 100
-
-CLI:
-    python main.py --config config.yaml --stream
-"""
 from __future__ import annotations
 
 import asyncio
@@ -36,9 +18,7 @@ from pydantic import BaseModel, ConfigDict, Field
 logger = logging.getLogger(__name__)
 
 
-# ---------------------------------------------------------------------------
 # Config
-# ---------------------------------------------------------------------------
 
 class StreamMode(str, Enum):
     STDOUT    = "stdout"
@@ -61,9 +41,8 @@ class StreamingConfig(BaseModel):
     ws_ping_interval:     int        = Field(default=20, ge=1)
 
 
-# ---------------------------------------------------------------------------
+
 # Record Serializers
-# ---------------------------------------------------------------------------
 
 def _row_to_json(row: pd.Series) -> str:
     """Tek DataFrame satırını JSON string'e dönüştür."""
@@ -82,9 +61,7 @@ def _df_to_csv_lines(df: pd.DataFrame, include_header: bool = False) -> List[str
     return buf.getvalue().splitlines()
 
 
-# ---------------------------------------------------------------------------
 # Base Streamer
-# ---------------------------------------------------------------------------
 
 class BaseStreamer:
     """Tüm streamer implementasyonlarının ortak arayüzü."""
@@ -112,9 +89,7 @@ class BaseStreamer:
             return lines
 
 
-# ---------------------------------------------------------------------------
 # Stdout Streamer
-# ---------------------------------------------------------------------------
 
 class StdoutStreamer(BaseStreamer):
     """SAR verilerini stdout'a satır satır yazar."""
@@ -132,9 +107,7 @@ class StdoutStreamer(BaseStreamer):
         sys.stdout.flush()
 
 
-# ---------------------------------------------------------------------------
 # Socket Streamer
-# ---------------------------------------------------------------------------
 
 class SocketStreamer(BaseStreamer):
     """
@@ -212,18 +185,11 @@ class SocketStreamer(BaseStreamer):
         logger.info("SocketStreamer kapatıldı.")
 
 
-# ---------------------------------------------------------------------------
 # WebSocket Streamer
-# ---------------------------------------------------------------------------
 
 class WebSocketStreamer(BaseStreamer):
     """
     WebSocket üzerinden SAR verisi yayını (asyncio tabanlı).
-
-    Gereksinim: pip install websockets
-    Tüm bağlı WebSocket client'larına broadcast yapar.
-
-    Test: wscat -c ws://localhost:9000
     """
 
     def __init__(self, config: StreamingConfig):
@@ -305,27 +271,11 @@ class WebSocketStreamer(BaseStreamer):
         logger.info("WebSocketStreamer kapatıldı.")
 
 
-# ---------------------------------------------------------------------------
-# SARStreamer – Facade
-# ---------------------------------------------------------------------------
+# SARStreamer
 
 class SARStreamer:
     """
     Tek giriş noktası: config'e göre doğru streamer'ı oluşturur ve yönetir.
-
-    Örnek::
-
-        streamer = SARStreamer(streaming_config)
-        streamer.start()
-        for chunk in generator.generate_chunks():
-            streamer.send_chunk(chunk)
-        streamer.stop()
-
-    Veya context manager olarak::
-
-        with SARStreamer(streaming_config) as s:
-            for chunk in generator.generate_chunks():
-                s.send_chunk(chunk)
     """
 
     def __init__(self, config: StreamingConfig):

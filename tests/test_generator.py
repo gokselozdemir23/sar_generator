@@ -1,7 +1,3 @@
-"""
-Unit tests for the SAR Log Data Generator.
-Covers configuration, generation engine, anomaly injection, and output adapters.
-"""
 from __future__ import annotations
 
 import os
@@ -29,9 +25,7 @@ from adapters.output import CSVOutputAdapter, JSONOutputAdapter, OutputManager
 from models.node_profiles import get_profile
 
 
-# ---------------------------------------------------------------------------
 # Fixtures
-# ---------------------------------------------------------------------------
 
 @pytest.fixture
 def short_config() -> SimulationConfig:
@@ -75,9 +69,7 @@ def scenario_config() -> SimulationConfig:
     )
 
 
-# ---------------------------------------------------------------------------
 # Configuration tests
-# ---------------------------------------------------------------------------
 
 class TestConfiguration:
     def test_default_config_valid(self):
@@ -106,9 +98,7 @@ class TestConfiguration:
         assert sc.end_time == datetime(2024, 1, 1, 5, 0, 0)
 
 
-# ---------------------------------------------------------------------------
 # Node profile tests
-# ---------------------------------------------------------------------------
 
 class TestNodeProfiles:
     @pytest.mark.parametrize("node_type", [
@@ -144,9 +134,7 @@ class TestNodeProfiles:
             assert key in p.metrics, f"Missing key metric: {key}"
 
 
-# ---------------------------------------------------------------------------
 # Generator tests
-# ---------------------------------------------------------------------------
 
 class TestTimeSeriesGenerator:
     def test_generates_correct_row_count(self, short_config):
