@@ -9,6 +9,7 @@
 - [Özellikler](#özellikler)
 - [Hızlı Başlangıç](#hızlı-başlangıç)
 - [Kurulum](#kurulum)
+- [Web Arayüzü (Streamlit GUI)](#web-arayüzü-streamlit-gui)
 - [Yapılandırma](#yapılandırma)
   - [YAML Yapılandırma Örneği](#yaml-yapılandırma-örneği)
   - [Node Tipleri](#node-tipleri)
@@ -95,6 +96,15 @@
 - Karşılaştırma modülü testleri
 - Genişletilmiş modül testleri (database, streaming, rotation, validation, benchmark)
 
+**Web Arayüzü (Streamlit GUI)**
+- Tarayıcı üzerinden tam özellikli görsel arayüz (`app.py`)
+- Sidebar'dan dinamik node grubu ve senaryo ekleme/silme
+- 5 sekmeli ana içerik: Overview, Results, Visualize, Validate, Download
+- Tüm grafikler interaktif host seçici ile anlık render (önbellek destekli)
+- Tarayıcıdan CSV ve JSON indirme + diske kaydetme
+- İstatistiksel doğrulama ve referans karşılaştırması sonuçlarını tablo olarak görüntüleme
+- CLI (`main.py`) tamamen korunmuş; iki arayüz birbirinden bağımsız
+
 **Dağıtım**
 - Docker container (Dockerfile + docker-compose.yml)
 - PyPI-ready paketleme (pyproject.toml)
@@ -103,6 +113,8 @@
 ---
 
 ## Hızlı Başlangıç
+
+### CLI (Komut Satırı)
 
 ```bash
 # Bağımlılıkları yükle
@@ -129,6 +141,18 @@ python main.py --by-node
 # Detaylı log
 python main.py -v
 ```
+
+### Web Arayüzü (Streamlit GUI)
+
+```bash
+# Streamlit kurulumu (requirements.txt içinde zaten mevcut)
+pip install -r requirements.txt
+
+# Arayüzü başlat
+streamlit run app.py
+```
+
+Tarayıcınızda `http://localhost:8501` adresi otomatik olarak açılır.
 
 ---
 
@@ -174,12 +198,81 @@ pip install -e ".[test]"
 | Paket              | Amaç                          |
 |--------------------|-------------------------------|
 | matplotlib         | Görselleştirme (`--visualize`)|
+| streamlit          | Web arayüzü (`app.py`)        |
 | influxdb-client    | InfluxDB v2 yazıcı            |
 | psycopg2-binary    | PostgreSQL yazıcı              |
 | prometheus-client  | Prometheus exporter            |
 | websockets         | WebSocket streaming            |
 | hypothesis         | Property-based testler         |
 | pytest             | Test framework                 |
+
+---
+
+## Web Arayüzü (Streamlit GUI)
+
+`app.py`, CLI (`main.py`) ile tamamen aynı işlevselliği sunan görsel bir web arayüzüdür. İki arayüz birbirinden bağımsızdır; CLI kodu değiştirilmemiştir.
+
+### Başlatma
+
+```bash
+streamlit run app.py
+# → http://localhost:8501
+```
+
+### Arayüz Yapısı
+
+```
+┌──────────────────────────┬──────────────────────────────────────────────────┐
+│  SIDEBAR (Yapılandırma)  │  ANA İÇERİK                                      │
+│                          │                                                  │
+│  📅 Simulation Period    │  Sekmeler:                                        │
+│  🔧 Advanced Settings    │  ┌──────────────────────────────────────────────┐│
+│  🖥 Node Groups          │  │ 📋 Overview                                  ││
+│     [+ Add / Remove]     │  │   Node grubu + senaryo özet tablosu          ││
+│  ⚡ Anomaly Scenarios    │  │   Tahminî satır sayısı, süre, metrik kartlar  ││
+│     [+ Add / Remove]     │  ├──────────────────────────────────────────────┤│
+│  📁 Output Settings      │  │ 📊 Results                                   ││
+│                          │  │   DataFrame önizleme (host filtreli)         ││
+│  [🚀 Generate SAR Data]  │  │   Temel istatistikler tablosu                ││
+│                          │  ├──────────────────────────────────────────────┤│
+│                          │  │ 📈 Visualize                                 ││
+│                          │  │   Host seçici + grafik seçici                ││
+│                          │  │   CPU / Memory / Network / Disk / Anomaly    ││
+│                          │  ├──────────────────────────────────────────────┤│
+│                          │  │ 🔍 Validate                                  ││
+│                          │  │   İstatistiksel doğrulama (MetricCheck,      ││
+│                          │  │   CorrelationCheck, AnomalyCheck)            ││
+│                          │  │   Referans SAR karşılaştırması (KS testi)    ││
+│                          │  ├──────────────────────────────────────────────┤│
+│                          │  │ ⬇ Download                                  ││
+│                          │  │   Tarayıcıdan CSV / JSON indirme             ││
+│                          │  │   Diske kaydetme (output dizinine)           ││
+│                          │  └──────────────────────────────────────────────┘│
+└──────────────────────────┴──────────────────────────────────────────────────┘
+```
+
+### Özellikler
+
+| Özellik | Açıklama |
+|---|---|
+| Dinamik node grupları | Sidebar'dan istediğiniz kadar node grubu ekleyin veya silin |
+| Dinamik senaryolar | Anomali senaryolarını anında ekleyin, yapılandırın, kaldırın |
+| Anlık önizleme | Yapılandırma değiştiğinde Overview sekmesi otomatik güncellenir |
+| Önbellekli grafikler | Aynı veri seti için grafikler yeniden üretilmez (`@st.cache_data`) |
+| İndirme | Tarayıcıdan tek tıkla CSV / JSON indirme |
+| Diske yazma | `OutputManager` ile yapılandırılmış output dizinine kaydetme |
+| Doğrulama | `StatisticalValidator` ve `SARPatternComparator` sonuçlarını tablo olarak gösterir |
+
+### CLI ile Karşılaştırma
+
+| İşlem | CLI | GUI |
+|---|---|---|
+| Veri üretme | `python main.py -c config.yaml` | Sidebar → Generate |
+| Görselleştirme | `python main.py --visualize file.csv` | Visualize sekmesi |
+| İstatistiksel doğrulama | `python main.py --validate-data file.csv` | Validate sekmesi |
+| Referans karşılaştırması | `python main.py --compare-reference file.csv` | Validate sekmesi |
+| CSV indirme | Dosya sistemi | Download sekmesi → tarayıcı |
+| Yapılandırma | YAML dosyası | Sidebar widget'ları |
 
 ---
 
@@ -800,6 +893,7 @@ Servisler:
 sar_generator/
 ├── config.py                     # Yapılandırma yönetimi (Pydantic v2)
 ├── main.py                       # CLI giriş noktası (Click)
+├── app.py                        # Streamlit web arayüzü (GUI)
 ├── benchmark.py                  # Benchmark CLI wrapper
 ├── requirements.txt              # Python bağımlılıkları
 ├── pyproject.toml                # PyPI paketleme yapılandırması
@@ -851,6 +945,13 @@ sar_generator/
 ## Mimari Genel Bakış
 
 ```
+┌────────────────────────────────┬────────────────────────────────────┐
+│   main.py  (CLI — Click)       │   app.py  (Streamlit Web GUI)      │
+│   python main.py [OPTIONS]     │   streamlit run app.py             │
+└───────────────┬────────────────┴──────────────┬─────────────────────┘
+                │                               │
+                └───────────────┬───────────────┘
+                                ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        config.py (Pydantic v2)                      │
 │  SimulationConfig → NodeConfig → ScenarioConfig → OutputConfig      │
@@ -930,6 +1031,7 @@ sar_generator/
 | Veri İşleme     | NumPy, Pandas, SciPy                         |
 | Yapılandırma    | Pydantic v2, PyYAML                          |
 | CLI             | Click                                        |
+| Web Arayüzü     | Streamlit ≥ 1.35                             |
 | Görselleştirme  | matplotlib (opsiyonel)                        |
 | Veritabanı      | influxdb-client, psycopg2, prometheus-client  |
 | Streaming       | websockets (opsiyonel)                        |

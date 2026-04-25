@@ -47,6 +47,10 @@ influxdb-client>=1.36.0
 psycopg2-binary>=2.9.0
 prometheus-client>=0.17.0
 
+# --- GUI ---
+# Streamlit web arayüzü (app.py)  –  CLI (main.py) etkilenmez
+streamlit>=1.35.0
+
 # --- Testing & Development ---
 # Birim, performans ve property tabanlı testleri çalıştırmak için
 pytest>=7.0.0
